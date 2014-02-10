@@ -18,65 +18,63 @@ package {
 		private static const sphereImage:Class;
 		[Embed(source="bar.png")]
 		private static const barImage:Class;
-		[Embed(source="GGvect_100x100.png")]
-		private static const MyImage:Class
 		
 		private var thomImg:Image;
 		private var sphereImg:Image;
 		private var barImg:Image;
 		private var ggImg:Image;
-		public var bullets:Vector.<Bullet>;
+		public var enemies:Vector.<Enemy>;
 		public static var inst:MyStarlingApp;
+		private var velocity:Point;
+		private var timer:uint;
+		
 		public function MyStarlingApp() {
 			super();
 			
 			inst = this;
-			bullets = new Vector.<Bullet>();
+			enemies = new Vector.<Enemy>();
+			velocity = new Point(0, 0);
+			timer = 0;
 			
 			addEventListener(Event.ADDED_TO_STAGE, onAddedToStage);
 			addEventListener(Event.ENTER_FRAME, onEnterFrame);
-			addEventListener(TouchEvent.TOUCH, onTouch);
-			trace("test");
+		
 		}
 		
 		private function onTouch(event:TouchEvent):void {
-			var touch:Touch = event.getTouch(this, TouchPhase.MOVED);
+			var touch:Touch = event.getTouch(this, TouchPhase.BEGAN);
 			if (touch) {
 				var localPos:Point = touch.getLocation(this);
-				sphereImg.x = localPos.x;
-				thomImg.rotation = ((localPos.x / stage.stageWidth) * 6.283) - 3.14;
-				var newBullet:Bullet = new Bullet(new Point(thomImg.x, thomImg.y), thomImg.rotation, stage);
+				if (localPos.x < stage.stageWidth / 2) {
+					moveLeft();
+				} else {
+					attackRight();
+				}
+				
 			}
 		}
 		
+		private function moveLeft():void {
+			velocity.x = -8;
+		}
+		
+		private function attackRight():void {
+			velocity.y = -25;
+			velocity.x = 15;
+		}
 		
 		private function onAddedToStage(e:Event):void {
 			removeEventListener(Event.ADDED_TO_STAGE, onAddedToStage);
+			stage.addEventListener(TouchEvent.TOUCH, onTouch);
 			
 			createAndShowImage();
 		}
 		
 		private function createAndShowImage():void {
-			// Create bitmap instance and use it to create an image 
-			var myBitmap:Bitmap = new MyImage();
-			ggImg = Image.fromBitmap(myBitmap);
-			
-			// Change images origin to it's center
-			// (Otherwise by default it's top left)
-			ggImg.pivotX = ggImg.width / 2;
-			ggImg.pivotY = ggImg.height / 2;
-			
-			// Where to place the image on screen
-			ggImg.x = stage.stageWidth / 2;
-			ggImg.y = stage.stageHeight / 2;
-			
-			// Add image to display in order to show it
-			addChild(ggImg);
-			
 			var textField:TextField = new TextField(400, 300, "Welcome to Starling!");
 			addChild(textField);
 			
-			myBitmap = new barImage();
+			var myBitmap:Bitmap = new barImage();
 			barImg = Image.fromBitmap(myBitmap);
 			barImg.pivotX = barImg.width / 2;
 			barImg.pivotY = barImg.height / 2;
@@ -111,9 +109,41 @@ package {
 		}
 		
 		private function onEnterFrame(e:Event):void {
-			// Rotate slightly each frame
-			ggImg.rotation -= 0.01;
-			for each(var b:Bullet in bullets) {
+			if (velocity.x != 0) {
+				var endVel:Number;
+				if (velocity.x > 0) {
+					endVel = velocity.x - 1;
+					if (endVel > 0) {
+						velocity.x = endVel;
+					} else {
+						velocity.x = 0;
+					}
+				} else {
+					endVel = velocity.x + 1;
+					if (endVel < 0) {
+						velocity.x = endVel;
+					} else {
+						velocity.x = 0;
+					}
+				}
+			}
+			velocity.y += 3;
+			
+			if (thomImg.y + velocity.y >= stage.stageHeight * 0.75) {
+				thomImg.y = stage.stageHeight * 0.75;
+				velocity.y = 0;
+			}
+			
+			thomImg.x += velocity.x;
+			thomImg.y += velocity.y;
+			
+			timer++;
+			if (timer > 120) {
+				timer = 0;
+				var newEnemy:Enemy = new Enemy(new Point(stage.stageWidth + 50, stage.stageHeight * 0.75), stage);
+			}
+			
+			for each (var b:Enemy in enemies) {
 				b.update();
 			}
 		}

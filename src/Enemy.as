@@ -9,16 +9,16 @@ package {
 	 * ...
 	 * @author Michael M
 	 */
-	public class Bullet {
-		[Embed(source="fireball.png")]
-		private static const bulletImage:Class
+	public class Enemy {
+		[Embed(source="GGvect_100x100.png")]
+		private static const ggImage:Class
 		private var img:Image;
 		private var stage:Stage;
 		private var vel:Point;
 		
-		public function Bullet(spawn:Point, rot:Number, stage:Stage) {
+		public function Enemy(spawn:Point, stage:Stage) {
 			super();
-			var myBitmap:Bitmap = new bulletImage();
+			var myBitmap:Bitmap = new ggImage();
 			img = Image.fromBitmap(myBitmap);
 			
 			// Change images origin to it's center
@@ -29,20 +29,20 @@ package {
 			// Where to place the image on screen
 			img.x = spawn.x;
 			img.y = spawn.y;
-			img.rotation = rot - 3.14 / 2;
 			
-			vel = new Point(Math.cos(img.rotation) * Math.PI, Math.sin(img.rotation)*Math.PI);
+			vel = new Point(-5,0);
 			this.stage = stage;
 			stage.addChild(img);
-			MyStarlingApp.inst.bullets.push(this);
+			MyStarlingApp.inst.enemies.push(this);
 		}
 		
 		public function update():void {
-			img.x += vel.x * 10;
-			img.y += vel.y * 10;
-			if (img.x > stage.stageWidth || img.x < 0 || img.y > stage.stageHeight || img.y < 0) {
+			img.rotation-=0.1;
+			img.x += vel.x;
+			img.y += vel.y;
+			if (img.x < 0 || img.y > stage.stageHeight || img.y < 0) {
 				stage.removeChild(img);
-				MyStarlingApp.inst.bullets.splice(MyStarlingApp.inst.bullets.indexOf(this), 1);
+				MyStarlingApp.inst.enemies.splice(MyStarlingApp.inst.enemies.indexOf(this), 1);
 			}
 		}
 	}

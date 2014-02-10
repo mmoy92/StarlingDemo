@@ -6,8 +6,8 @@
     <movie input="" />
     <movie path="bin\StarlingAndroid.swf" />
     <movie fps="60" />
-    <movie width="480" />
-    <movie height="854" />
+    <movie width="854" />
+    <movie height="480" />
     <movie version="3" />
     <movie minorVersion="9" />
     <movie platform="AIR Mobile" />
