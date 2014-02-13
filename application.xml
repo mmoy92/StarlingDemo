@@ -56,9 +56,7 @@
 		<content>StarlingAndroid.swf</content>
 		<visible>true</visible>
 		<fullScreen>true</fullScreen>
-		<!--<autoOrients>false</autoOrients>-->
-		<!--<aspectRatio>landscape</aspectRatio>-->
-		<aspectRatio>portrait</aspectRatio>
+		<aspectRatio>landscape</aspectRatio>
 		<autoOrients>false</autoOrients>
 		<renderMode>direct</renderMode>
 		<!--<depthAndStencil>true</depthAndStencil>-->
