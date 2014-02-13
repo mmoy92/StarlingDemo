@@ -8,73 +8,96 @@ package {
 	import starling.display.Image;
 	import starling.display.Sprite;
 	import starling.display.Stage;
+	import starling.events.EnterFrameEvent;
 	
 	/**
 	 * ...
 	 * @author Michael M
 	 */
-	public class Enemy {
-		[Embed(source="carb.png")]
-		private static const carbImage:Class
-		public var img:Image;
+	public class Enemy extends Sprite{
 		private var main:MyStarlingApp;
 		private var vel:Point;
-		private var dead:Boolean = false;
+		private var spawn:Point;
 		
-		public function Enemy(spawn:Point, main:MyStarlingApp) {
+		public var isDead:Boolean;
+		
+		public function Enemy() {
 			super();
-			var myBitmap:Bitmap = new carbImage();
-			img = Image.fromBitmap(myBitmap);
+			main = MyStarlingApp.inst;
+			addChild(new Image(Assets.carbTexture));
+			spawn = new Point(main.stage.stageWidth + 50, main.ground_y - height/2);
 			
 			// Change images origin to it's center
-			// (Otherwise by default it's top left)
-			img.pivotX = img.width / 2;
-			img.pivotY = img.height / 2;
-			
-			// Where to place the image on screen
-			img.x = spawn.x;
-			img.y = spawn.y;
+			pivotX = width / 2;
+			pivotY = height / 2;
+			touchable = false;
 			
 			vel = new Point(-3, 0);
-			this.main = main;
-			main.addChild(img);
-			main.enemies.push(this);
 		}
 		
-		public function kill():void {
-			if (!dead) {
-				var tween:Tween = new Tween(img, 1, Transitions.EASE_OUT);
+		public function init():void {
+			isDead = false;
+			
+			visible = true;
+			x = spawn.x;
+			y = spawn.y;
+			rotation = 0;
+			
+			main.liveEnemies.push(this);
+			addEventListener(EnterFrameEvent.ENTER_FRAME, onEnterFrame);
+		}
+		/**
+		 * Game loop.
+		 * Applies velocity for movement.
+		 * Disposes once off screen.
+		 * Checks hit against hero.
+		 * @param	e
+		 */
+		private function onEnterFrame(e:EnterFrameEvent):void {
+			if (!isDead && !main.gameover) {
+				x += e.passedTime * 100 * (vel.x - main.velocity.x);
+				y += e.passedTime * 100 * vel.y;
+				if (x < -100 || y > main.stage.stageHeight || y < 0) {
+					free();
+				} else {
+					if (main.hero.getRect().intersects(getRect())) {
+						main.loseGame();
+					}
+				}
+			}
+		}
+		/**
+		 * Death animation.
+		 * 
+		 * Calls free() once animation finishes.
+		 */
+		public function deathAnimation():void {
+			if (!isDead) {
+				isDead = true;
+				var tween:Tween = new Tween(this, 1, Transitions.EASE_OUT);
 				tween.animate("y", main.stage.stageHeight + 100);
 				tween.animate("rotation", 10);
-				tween.animate("x", img.x + Math.random() * 200);
-				tween.onComplete = remove;
-				dead = true;
+				tween.animate("x", x + Math.random() * 200);
+				tween.onComplete = free;
 				Starling.juggler.add(tween);
 			}
-		
 		}
-		
-		public function remove():void {
-			Starling.juggler.removeTweens(img);
-			main.enemies.splice(main.enemies.indexOf(this), 1);
-			img.removeFromParent(true);
-			img = null;
+		/**
+		 * Removed from liveEnemies array, and animation juggler.
+		 * Sent to back of pool.
+		 */
+		public function free():void {
+			main.liveEnemies.splice(main.liveEnemies.indexOf(this), 1);
+			main.enemyPool.freeSprite(this);
+			
+			Starling.juggler.removeTweens(this);
+			removeEventListener(EnterFrameEvent.ENTER_FRAME, onEnterFrame);
+			visible = false;
 		}
 		
 		public function getRect():Rectangle {
 			var rect:Rectangle;
-			return img.getBounds(main, rect);
-		}
-		
-		public function update(passedTime:Number):void {
-			if (!dead) {
-				img.x += passedTime * 100 * (vel.x - main.velocity.x);
-				img.y += passedTime * 100 * vel.y;
-				if (img.x < -100 || img.y > main.stage.stageHeight || img.y < 0) {
-					dead = true;
-					remove();
-				}
-			}
+			return getBounds(main, rect);
 		}
 	}
 

@@ -17,32 +17,27 @@ package {
 	import starling.textures.Texture;
 	
 	public class MyStarlingApp extends Sprite {
-		[Embed(source="STHOMAS.png")]
-		private static const thomImage:Class
-		[Embed(source="bg.png")]
-		private static const backImage:Class;
-		[Embed(source="slash.png")]
-		private static const slashImage:Class;
+		public static var inst:MyStarlingApp;
+		public var enemyPool:SpritePool;
+		public var liveEnemies:Vector.<Enemy>;
 		
-		private var thomImg:Image;
-		private var ggImg:Image;
+		public var velocity:Point;
+		public var hero:Hero;
+		public var ground_y:Number;
+		public var gameover:Boolean;
+		
 		private var bgSprite:Sprite;
 		private var bgSpriteB:Sprite;
-		private var slashImg:Image;
-		public var enemies:Vector.<Enemy>;
-		public static var inst:MyStarlingApp;
-		public var velocity:Point;
 		private var timer:Number;
-		private var attacking:Boolean;
-		public static var ground_y:Number;
-		private var score:uint = 0;
+		private var score:Number;
 		private var textField:TextField;
-		private var gameover:Boolean;
+		private var slashImg:Image;
+		private var slashTween:Tween;
 		
 		public function MyStarlingApp() {
 			super();
 			
-			init();
+			Assets.init();
 			
 			addEventListener(Event.ADDED_TO_STAGE, onAddedToStage);
 			this.addEventListener(EnterFrameEvent.ENTER_FRAME, onEnterFrame);
@@ -50,209 +45,233 @@ package {
 		}
 		
 		private function init():void {
-			inst = this;
-			enemies = new Vector.<Enemy>();
+			liveEnemies = new Vector.<Enemy>();
 			velocity = new Point(0, 0);
+			
 			timer = 0;
-			attacking = false;
+			score = 0;
+			
 			gameover = false;
+		
 		}
 		
 		private function onAddedToStage(e:Event):void {
 			removeEventListener(Event.ADDED_TO_STAGE, onAddedToStage);
 			stage.addEventListener(TouchEvent.TOUCH, onTouch);
+			
+			init();
+			
+			inst = this;
 			ground_y = stage.stageHeight * 0.75;
-			createAndShowImage();
+			enemyPool = new SpritePool(Enemy, 30);
+			
+			initLevel();
 		}
 		
 		private function onTouch(event:TouchEvent):void {
-			var touch:Touch = event.getTouch(this, TouchPhase.BEGAN);
+			var touch:Touch = event.getTouch(stage, TouchPhase.BEGAN);
 			if (touch) {
 				if (!gameover) {
-					var localPos:Point = touch.getLocation(this);
+					var localPos:Point = touch.getLocation(stage);
 					if (localPos.x < stage.stageWidth * 0.3) {
 						moveLeft();
 					} else {
 						attackRight();
 					}
+					textField.text = "Distance: " + score;
 				} else {
 					Starling.juggler.purge();
-					thomImg.x = stage.stageWidth * 0.3;
-					thomImg.y = stage.stageHeight / 2;
-					thomImg.rotation = 0;
 					
-					for each (var b:Enemy in enemies) {
-						b.img.removeFromParent(true);
-						b.img = null;
+					while (liveEnemies.length > 0) {
+						var b:Enemy = liveEnemies[0];
+						b.free();
 					}
+					hero.initPosition();
 					init();
 				}
 			}
 		}
 		
 		private function moveLeft():void {
-			velocity.x = -20;
+			velocity.x = -15;
+			score += velocity.x;
 		}
 		
 		private function attackRight():void {
-			//if (thomImg.y >= ground_y) {
-			velocity.y = -22;
-			velocity.x = 10;
-			//}
-			attacking = true;
+			if (hero.isGround) {
+				hero.isGround = false;
+				velocity.y = -22;
+				velocity.x = 10;
+				
+				score += velocity.x;
+			}
+		
 		}
 		
-		private function createAndShowImage():void {
-			textField = new TextField(400, 300, "Score: 0");
+		/**
+		 * Sets up score, background, hero, and slash effect.
+		 * Called only once.
+		 */
+		private function initLevel():void {
+			//Create textfield
+			textField = new TextField(stage.stageWidth, 300, "Distance: 0");
 			addChild(textField);
 			
+			initBackground();
+			
+			//Create hero
+			hero = new Hero();
+			hero.initPosition();
+			addChild(hero);
+			
+			initSlashImage();
+		
+		}
+		
+		private function initSlashImage():void {
+			slashImg = new Image(Assets.slashTexture);
+			slashImg.x = hero.x + hero.width / 2;
+			slashImg.alpha = 0;
+			slashImg.touchable = false;
+			addChild(slashImg);
+			
+			slashTween = new Tween(slashImg, 0.5, Transitions.EASE_OUT);
+		}
+		
+		/**
+		 * Creates 2 container sprites, each holding 2 copies of the BG texture.
+		 */
+		private function initBackground():void {
 			bgSprite = new Sprite();
 			bgSpriteB = new Sprite();
 			
-			var myBitmap:Bitmap = new backImage();
-			
-			var bgImg:Image = Image.fromBitmap(myBitmap);
+			var bgImg:Image = new Image(Assets.bgTexture);
 			bgImg.x = 0;
 			bgImg.y = stage.stageHeight - bgImg.height;
 			bgSprite.addChild(bgImg);
 			
-			bgImg = Image.fromBitmap(myBitmap);
+			bgImg = new Image(Assets.bgTexture);
 			bgImg.x = bgImg.width;
 			bgImg.y = stage.stageHeight - bgImg.height;
 			bgSprite.addChild(bgImg);
-			
+			bgSprite.touchable = false;
 			addChild(bgSprite);
 			
-			bgImg = Image.fromBitmap(myBitmap);
+			bgImg = new Image(Assets.bgTexture);
 			bgImg.x = 0;
 			bgImg.y = stage.stageHeight - bgImg.height;
 			bgSpriteB.addChild(bgImg);
 			
-			bgImg = Image.fromBitmap(myBitmap);
+			bgImg = new Image(Assets.bgTexture);
 			bgImg.x = bgImg.width;
 			bgImg.y = stage.stageHeight - bgImg.height;
 			
 			bgSpriteB.addChild(bgImg);
-			
+			bgSpriteB.touchable = false;
 			bgSpriteB.x = bgSprite.width;
 			
 			addChild(bgSpriteB);
-			
-			myBitmap = new thomImage();
-			thomImg = Image.fromBitmap(myBitmap);
-			
-			thomImg.pivotX = thomImg.width / 2;
-			thomImg.pivotY = thomImg.height / 2;
-			thomImg.scaleX = thomImg.scaleY = 0.2;
-			thomImg.x = stage.stageWidth * 0.3;
-			thomImg.y = stage.stageHeight / 2;
-			
-			addChild(thomImg);
-			
-			myBitmap = new slashImage();
-			slashImg = Image.fromBitmap(myBitmap);
-			slashImg.x = thomImg.x + thomImg.width / 2;
-			slashImg.alpha = 0;
-			addChild(slashImg);
 		}
 		
+		public function loseGame():void {
+			gameover = true;
+			textField.text = "Game Over! Distance: " + score;
+			hero.loseAnimation();
+		}
+		
+		public function slashAnimation():void {
+			//Animation effect
+			Starling.juggler.removeTweens(slashImg);
+			slashImg.alpha = 1;
+			slashImg.y = ground_y - 120;
+			slashTween.reset(slashImg, 0.5, Transitions.EASE_OUT);
+			
+			slashTween.animate("alpha", 0);
+			slashTween.animate("y", slashImg.y + 10);
+			Starling.juggler.add(slashTween);
+			
+			//Hit detection against all live enemies
+			var hitRect:Rectangle = slashImg.getBounds(this);
+			for each (var b:Enemy in liveEnemies) {
+				if (hitRect.intersects(b.getRect())) {
+					b.deathAnimation();
+				}
+			}
+		}
+		
+		/**
+		 * Main game loop. Runs at ~60 times per second.
+		 * @param	e
+		 */
 		private function onEnterFrame(e:EnterFrameEvent):void {
 			if (!gameover) {
 				if (velocity.x != 0) {
-					var endVel:Number;
-					if (velocity.x > 0) {
-						endVel = velocity.x - 1;
-						if (endVel > 0) {
-							velocity.x = endVel;
-						} else {
-							velocity.x = 0;
-						}
-					} else {
-						endVel = velocity.x + 1;
-						if (endVel < 0) {
-							velocity.x = endVel;
-						} else {
-							velocity.x = 0;
-						}
-					}
+					horizontalFriction();
+					scrollBackground(e.passedTime);
 				}
 				velocity.y += 3;
 				
-				if (velocity.x != 0) {
-					bgSprite.x -= velocity.x * 100 * e.passedTime;
-					bgSpriteB.x -= velocity.x * 100 * e.passedTime;
-					if (bgSprite.x < -bgSprite.width) {
-						bgSprite.x = bgSpriteB.x + bgSpriteB.width;
-					}
-					if (bgSpriteB.x < -bgSpriteB.width) {
-						bgSpriteB.x = bgSprite.x + bgSprite.width;
-					}
-					if (bgSprite.x > bgSprite.width) {
-						bgSprite.x = bgSpriteB.x - bgSpriteB.width;
-					}
-					if (bgSpriteB.x > bgSpriteB.width) {
-						bgSpriteB.x = bgSprite.x - bgSprite.width;
-					}
-				}
+				hero.update(e.passedTime);
 				
-				if (velocity.y != 0) {
-					thomImg.y += velocity.y * 100 * e.passedTime;
-					if (thomImg.y >= ground_y - thomImg.height / 2) {
-						thomImg.y = ground_y - thomImg.height / 2;
-						velocity.y = 0;
-					}
-				}
+				//Create new enemy every couple second
 				timer += e.passedTime;
-				if (timer > 0.2 + Math.random() * 0.8) {
+				if (timer > 0.35 + Math.random() * 0.8) {
 					timer = 0;
-					var newEnemy:Enemy = new Enemy(new Point(stage.stageWidth + 50, ground_y - 40), this);
-				}
-				var b:Enemy;
-				var hitRect:Rectangle;
-				var tween:Tween;
-				if (attacking && thomImg.y > ground_y - 120 && velocity.y > 0) {
-					
-					slashImg.y = thomImg.y;
-					Starling.juggler.removeTweens(slashImg);
-					
-					slashImg.alpha = 1;
-					tween = new Tween(slashImg, 0.5, Transitions.EASE_OUT);
-					tween.animate("alpha", 0);
-					tween.animate("y", slashImg.y + 10);
-					
-					Starling.juggler.add(tween);
-					
-					for each (b in enemies) {
-						hitRect = slashImg.getBounds(this);
-						
-						if (hitRect.intersects(b.getRect())) {
-							b.kill();
-							score++;
-						}
-					}
-					
-					textField.text = "Score: " + score;
-					attacking = false;
+					addEnemy();
 				}
 				
-				for each (b in enemies) {
-					b.update(e.passedTime);
-					if (!gameover) {
-						hitRect = thomImg.getBounds(this);
-						if (hitRect.intersects(b.getRect())) {
-							gameover = true;
-							textField.text = "Game Over! Score: " + score;
-							
-							tween = new Tween(thomImg, 0.5, Transitions.EASE_OUT);
-							tween.animate("y", thomImg.y - 100);
-							tween.animate("rotation", -5);
-							tween.animate("x", thomImg.x - 50);
-							//tween.onComplete = remove;
-							Starling.juggler.add(tween);
-						}
-					}
+			}
+		}
+		
+		/**
+		 * Applies friction against velocity.x
+		 */
+		private function horizontalFriction():void {
+			var endVel:Number;
+			if (velocity.x > 0) {
+				endVel = velocity.x - 1;
+				if (endVel > 0) {
+					velocity.x = endVel;
+				} else {
+					velocity.x = 0;
+				}
+			} else {
+				endVel = velocity.x + 1;
+				if (endVel < 0) {
+					velocity.x = endVel;
+				} else {
+					velocity.x = 0;
 				}
 			}
+		}
+		
+		/**
+		 * Moves the background depending on the current velocity.x.
+		 */
+		private function scrollBackground(passedTime:Number):void {
+			bgSprite.x -= velocity.x * 100 * passedTime;
+			bgSpriteB.x -= velocity.x * 100 * passedTime;
+			if (bgSprite.x < -bgSprite.width) {
+				bgSprite.x = bgSpriteB.x + bgSpriteB.width;
+			}
+			if (bgSpriteB.x < -bgSpriteB.width) {
+				bgSpriteB.x = bgSprite.x + bgSprite.width;
+			}
+			if (bgSprite.x > bgSprite.width) {
+				bgSprite.x = bgSpriteB.x - bgSpriteB.width;
+			}
+			if (bgSpriteB.x > bgSpriteB.width) {
+				bgSpriteB.x = bgSprite.x - bgSprite.width;
+			}
+		}
+		
+		/**
+		 * Pulls an enemy from the pool, initializes it.
+		 */
+		private function addEnemy():void {
+			var newEnemy:Enemy = Enemy(enemyPool.getSprite());
+			newEnemy.init();
+			addChild(newEnemy);
 		}
 	}
 }
