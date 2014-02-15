@@ -44,6 +44,7 @@ package {
 			rotation = 0;
 			
 			main.liveEnemies.push(this);
+			main.addChild(this);
 			addEventListener(EnterFrameEvent.ENTER_FRAME, onEnterFrame);
 		}
 		/**
@@ -89,6 +90,7 @@ package {
 		public function free():void {
 			main.liveEnemies.splice(main.liveEnemies.indexOf(this), 1);
 			main.enemyPool.freeSprite(this);
+			main.removeChild(this);
 			
 			Starling.juggler.removeTweens(this);
 			removeEventListener(EnterFrameEvent.ENTER_FRAME, onEnterFrame);

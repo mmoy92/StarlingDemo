@@ -19,6 +19,7 @@ package {
 	public class MyStarlingApp extends Sprite {
 		public static var inst:MyStarlingApp;
 		public var enemyPool:SpritePool;
+		public var groundPool:SpritePool;
 		public var liveEnemies:Vector.<Enemy>;
 		
 		public var velocity:Point;
@@ -28,6 +29,7 @@ package {
 		
 		private var bgSprite:Sprite;
 		private var bgSpriteB:Sprite;
+		
 		private var timer:Number;
 		private var score:Number;
 		private var textField:TextField;
@@ -58,12 +60,13 @@ package {
 		private function onAddedToStage(e:Event):void {
 			removeEventListener(Event.ADDED_TO_STAGE, onAddedToStage);
 			stage.addEventListener(TouchEvent.TOUCH, onTouch);
+			inst = this;
 			
 			init();
 			
-			inst = this;
 			ground_y = stage.stageHeight * 0.75;
 			enemyPool = new SpritePool(Enemy, 30);
+			groundPool = new SpritePool(Ground, 30);
 			
 			initLevel();
 		}
@@ -101,11 +104,10 @@ package {
 			if (hero.isGround) {
 				hero.isGround = false;
 				velocity.y = -22;
-				velocity.x = 10;
+				velocity.x = 12;
 				
 				score += velocity.x;
 			}
-		
 		}
 		
 		/**
@@ -147,30 +149,36 @@ package {
 			
 			var bgImg:Image = new Image(Assets.bgTexture);
 			bgImg.x = 0;
-			bgImg.y = stage.stageHeight - bgImg.height;
+			bgImg.y = stage.stageHeight - bgImg.height * 1.2;
 			bgSprite.addChild(bgImg);
 			
 			bgImg = new Image(Assets.bgTexture);
 			bgImg.x = bgImg.width;
-			bgImg.y = stage.stageHeight - bgImg.height;
+			bgImg.y = stage.stageHeight - bgImg.height * 1.2;
 			bgSprite.addChild(bgImg);
 			bgSprite.touchable = false;
 			addChild(bgSprite);
 			
 			bgImg = new Image(Assets.bgTexture);
 			bgImg.x = 0;
-			bgImg.y = stage.stageHeight - bgImg.height;
+			bgImg.y = stage.stageHeight - bgImg.height * 1.2;
 			bgSpriteB.addChild(bgImg);
 			
 			bgImg = new Image(Assets.bgTexture);
 			bgImg.x = bgImg.width;
-			bgImg.y = stage.stageHeight - bgImg.height;
+			bgImg.y = stage.stageHeight - bgImg.height * 1.2;
 			
 			bgSpriteB.addChild(bgImg);
 			bgSpriteB.touchable = false;
 			bgSpriteB.x = bgSprite.width;
 			
 			addChild(bgSpriteB);
+			var numGround:int = Math.ceil(stage.stageWidth / 170);
+			for (var i:uint = 0; i < numGround; i++) {
+				var g:Ground = Ground(groundPool.getSprite());
+				g.init();
+				g.x = i * g.width;
+			}
 		}
 		
 		public function loseGame():void {
@@ -199,6 +207,14 @@ package {
 			}
 		}
 		
+		public function addGround():void {
+			var g:Ground = Ground(groundPool.getSprite());
+			g.init();
+			if (Math.random() > 0.8) {
+				g.x += hero.width;
+			}
+		}
+		
 		/**
 		 * Main game loop. Runs at ~60 times per second.
 		 * @param	e
@@ -215,7 +231,7 @@ package {
 				
 				//Create new enemy every couple second
 				timer += e.passedTime;
-				if (timer > 0.35 + Math.random() * 0.8) {
+				if (timer > 0.55 + Math.random() * 0.8) {
 					timer = 0;
 					addEnemy();
 				}
@@ -271,7 +287,6 @@ package {
 		private function addEnemy():void {
 			var newEnemy:Enemy = Enemy(enemyPool.getSprite());
 			newEnemy.init();
-			addChild(newEnemy);
 		}
 	}
 }
