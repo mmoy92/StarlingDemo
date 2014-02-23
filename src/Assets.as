@@ -3,39 +3,35 @@ package {
 	 * ...
 	 * @author Michael M
 	 */
+	import flash.display.Bitmap;
+	import flash.utils.Dictionary;
 	import starling.textures.Texture;
+	import starling.textures.TextureAtlas;
 	
 	public class Assets {
-		[Embed(source="carb.png")]
-		private static const carbPNG:Class
-		public static var carbTexture:Texture;
+		[Embed(source="../assets/graphics/spriteSheet.png")]
+		public static const AtlasTextureGame:Class;
 		
-		[Embed(source="STHOMAS.png")]
-		private static const thomPNG:Class
-		public static var thomTexture:Texture;
+		[Embed(source="../assets/graphics/spriteSheet.xml",mimeType="application/octet-stream")]
+		public static const AtlasXmlGame:Class;
 		
-		[Embed(source="bg.png")]
-		private static const bgPNG:Class;
-		public static var bgTexture:Texture;
+		private static var gameTextures:Dictionary = new Dictionary();
+		private static var gameTextureAtlas:TextureAtlas;
 		
-		[Embed(source="slash.png")]
-		private static const slashPNG:Class;
-		public static var slashTexture:Texture;
-		
-		[Embed(source="ground.png")]
-		private static const groundPNG:Class;
-		public static var groundTexture:Texture;
-		
-		public function Assets() {
-		
+		public static function getAtlas():TextureAtlas {
+			if (gameTextureAtlas == null) {
+				var texture:Texture = getTexture("AtlasTextureGame");
+				var xml:XML = XML(new AtlasXmlGame());
+				gameTextureAtlas = new TextureAtlas(texture, xml);
+			}
+			return gameTextureAtlas;
 		}
-		
-		public static function init():void {
-			carbTexture = Texture.fromBitmap(new carbPNG());
-			thomTexture = Texture.fromBitmap(new thomPNG());
-			bgTexture = Texture.fromBitmap(new bgPNG());
-			slashTexture = Texture.fromBitmap(new slashPNG());
-			groundTexture = Texture.fromBitmap(new groundPNG());
+		public static function getTexture(name:String):Texture {
+			if (gameTextures[name] == undefined) {
+				var bitmap:Bitmap = new Assets[name]();
+				gameTextures[name] = Texture.fromBitmap(bitmap);
+			}
+			return gameTextures[name];
 		}
 	
 	}

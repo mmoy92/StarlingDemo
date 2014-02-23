@@ -14,8 +14,8 @@ package {
 	 * ...
 	 * @author Michael M
 	 */
-	public class Enemy extends Sprite{
-		private var main:MyStarlingApp;
+	public class Enemy extends Sprite {
+		private var main:MainGame;
 		private var vel:Point;
 		private var spawn:Point;
 		
@@ -23,17 +23,17 @@ package {
 		
 		public function Enemy() {
 			super();
-			main = MyStarlingApp.inst;
-			addChild(new Image(Assets.carbTexture));
+			main = MainGame.inst;
+			addChild(new Image(Assets.getAtlas().getTexture("carb")));
 			scaleX = scaleY = .55;
-			spawn = new Point(main.stage.stageWidth + 50, main.ground_y - height/2 - 16);
+			spawn = new Point(main.stage.stageWidth + 50, main.ground_y - height / 2 - 16);
 			
 			// Change images origin to it's center
 			pivotX = width / 2;
 			pivotY = height / 2;
 			touchable = false;
 			
-			vel = new Point(-3, 0);
+			vel = new Point(-5, 0);
 		}
 		
 		public function init():void {
@@ -48,6 +48,7 @@ package {
 			main.addChild(this);
 			addEventListener(EnterFrameEvent.ENTER_FRAME, onEnterFrame);
 		}
+		
 		/**
 		 * Game loop.
 		 * Applies velocity for movement.
@@ -57,8 +58,8 @@ package {
 		 */
 		private function onEnterFrame(e:EnterFrameEvent):void {
 			if (!isDead && !main.gameover) {
-				x += e.passedTime * 100 * (vel.x - main.velocity.x);
-				y += e.passedTime * 100 * vel.y;
+				x += (vel.x - main.velocity.x);
+				y +=  vel.y;
 				if (x < -100 || y > main.stage.stageHeight || y < 0) {
 					free();
 				} else {
@@ -68,9 +69,10 @@ package {
 				}
 			}
 		}
+		
 		/**
 		 * Death animation.
-		 * 
+		 *
 		 * Calls free() once animation finishes.
 		 */
 		public function deathAnimation():void {
@@ -84,6 +86,7 @@ package {
 				Starling.juggler.add(tween);
 			}
 		}
+		
 		/**
 		 * Removed from liveEnemies array, and animation juggler.
 		 * Sent to back of pool.

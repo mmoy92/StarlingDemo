@@ -12,7 +12,7 @@ package {
 	 * @author Michael M
 	 */
 	public class Hero extends Sprite {
-		private var main:MyStarlingApp;
+		private var main:MainGame;
 		private var spawn:Point;
 		
 		public var isDead:Boolean;
@@ -25,8 +25,8 @@ package {
 		
 		public function Hero() {
 			super();
-			main = MyStarlingApp.inst;
-			addChild(new Image(Assets.thomTexture));
+			main = MainGame.inst;
+			addChild( new Image(Assets.getAtlas().getTexture("STHOMAS")));
 			
 			spawn = new Point(main.stage.stageWidth * 0.3, main.stage.stageHeight / 2);
 			
@@ -58,7 +58,7 @@ package {
 		 * Calls slash animation when falling near the ground.
 		 * @param	passedTime
 		 */
-		public function update(passedTime:Number):void {
+		public function update():void {
 			y += main.velocity.y * 1.67; // 100 * 1 / 60
 			
 			if (!isGround) {

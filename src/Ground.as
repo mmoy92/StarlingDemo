@@ -11,15 +11,15 @@ package
 	 */
 	public class Ground extends Sprite 
 	{
-		private var main:MyStarlingApp;
+		private var main:MainGame;
 		private var spawn:Point;
 		
 		public function Ground() 
 		{
 			super();
-			main = MyStarlingApp.inst;
+			main = MainGame.inst;
 			
-			addChild(new Image(Assets.groundTexture));
+			addChild( new Image(Assets.getAtlas().getTexture("ground")));
 			spawn = new Point(main.stage.stageWidth + 50, main.ground_y - 10);
 			touchable = false;
 			
@@ -34,7 +34,7 @@ package
 		
 		private function onEnterFrame(e:EnterFrameEvent):void {
 			if (!main.gameover) {
-				x -= e.passedTime * 100 * main.velocity.x;
+				x -= main.velocity.x;
 				if (x < -width) {
 					free();
 				}

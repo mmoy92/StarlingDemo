@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with TexturePacker http://texturepacker.com-->
+<!-- $TexturePacker:SmartUpdate:d8082c8b4ca729efbf6ad430bef03896$ -->
+<TextureAtlas imagePath="spriteSheet.png">
+    <SubTexture name="STHOMAS" x="80" y="400" width="83" height="81"/>
+    <SubTexture name="bg" x="0" y="0" width="550" height="260"/>
+    <SubTexture name="carb" x="0" y="400" width="80" height="100"/>
+    <SubTexture name="fireball" x="163" y="400" width="122" height="77"/>
+    <SubTexture name="ground" x="0" y="260" width="170" height="140"/>
+    <SubTexture name="slash" x="170" y="260" width="160" height="55"/>
+</TextureAtlas>

@@ -25,11 +25,11 @@ package {
 		
 		private function SetupStarling():void {
 			// Create a new instance and pass our class and the stage
-		//	var viewPort:Rectangle = RectangleUtil.fit(new Rectangle(0, 0, stage.stageWidth, stage.stageHeight), new Rectangle(0, 0, stage.fullScreenWidth, stage.fullScreenHeight), StageScaleMode.SHOW_ALL);
+			//var viewPort:Rectangle = RectangleUtil.fit(new Rectangle(0, 0, stage.stageWidth, stage.stageHeight), new Rectangle(0, 0, stage.fullScreenWidth, stage.fullScreenHeight), StageScaleMode.SHOW_ALL);
 			
 			var viewPort:Rectangle = new Rectangle(0, 0, stage.fullScreenWidth, stage.fullScreenHeight);
 			
-			_starling = new Starling(MyStarlingApp, stage, viewPort);
+			_starling = new Starling(MainGame, stage, viewPort);
 			_starling.stage.stageWidth  = 854;
 			_starling.stage.stageHeight = 480;
 			
