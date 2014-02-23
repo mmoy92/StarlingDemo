@@ -14,41 +14,41 @@ package {
 		
 		public function Main():void {
 			// This time we won't scale our application (check next post for that :).
-			stage.scaleMode = StageScaleMode.NO_SCALE;
+			stage.scaleMode = StageScaleMode.SHOW_ALL;
 			stage.align = StageAlign.TOP_LEFT;
 			
 			// Trigger an event handler when application looses focus (see note in handler).
 			stage.addEventListener(Event.DEACTIVATE, deactivate);
-			
+			stage.addEventListener(Event.ACTIVATE, activate);
 			SetupStarling();
 		}
 		
 		private function SetupStarling():void {
 			// Create a new instance and pass our class and the stage
-			var viewPort:Rectangle = RectangleUtil.fit(new Rectangle(0, 0, stage.stageWidth, stage.stageHeight), new Rectangle(0, 0, stage.fullScreenWidth, stage.fullScreenHeight), StageScaleMode.SHOW_ALL);
+		//	var viewPort:Rectangle = RectangleUtil.fit(new Rectangle(0, 0, stage.stageWidth, stage.stageHeight), new Rectangle(0, 0, stage.fullScreenWidth, stage.fullScreenHeight), StageScaleMode.SHOW_ALL);
+			
+			var viewPort:Rectangle = new Rectangle(0, 0, stage.fullScreenWidth, stage.fullScreenHeight);
+			
 			_starling = new Starling(MyStarlingApp, stage, viewPort);
+			_starling.stage.stageWidth  = 854;
+			_starling.stage.stageHeight = 480;
 			
 			// Show debug stats
 			_starling.showStats = true;
 			
 			// Define level of antialiasing, 
-			_starling.antiAliasing = 1;
+			_starling.antiAliasing = 0;
 			
 			_starling.start();
 		}
 		
 		private function deactivate(e:Event):void {
-			// Auto-close the application when it looses focus. This is what you want 
-			// to do if you don't want that your application continues to run in the 
-			// background if the user switch program, answer a call or anything else 
-			// that would cause your application to lose focus.
-			//
-			// If you want to keep it running you should at least pause it until the 
-			// user returns. That's achieved by calling _starling.stop(). You should 
-			// also add an event listener for the Event.ACTIVATE event that will 
-			// trigger _starling.start() once the application get's focus again.
-			//
-			NativeApplication.nativeApplication.exit();
+			_starling.stop();
+		}
+		
+		private function activate(e:Event):void
+		{
+			_starling.start();
 		}
 	}
 

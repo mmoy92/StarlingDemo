@@ -34,7 +34,6 @@ package {
 			pivotY = height / 2;
 			touchable = false;
 			
-			scaleX = scaleY = 0.2;
 			ground_y = main.ground_y - height / 2;
 		}
 		

@@ -104,7 +104,7 @@ package {
 			if (hero.isGround) {
 				hero.isGround = false;
 				velocity.y = -22;
-				velocity.x = 12;
+				velocity.x = 14;
 				
 				score += velocity.x;
 			}
@@ -117,6 +117,8 @@ package {
 		private function initLevel():void {
 			//Create textfield
 			textField = new TextField(stage.stageWidth, 300, "Distance: 0");
+			textField.autoScale = true;
+			textField.fontSize = 20;
 			addChild(textField);
 			
 			initBackground();
@@ -135,8 +137,8 @@ package {
 			slashImg.x = hero.x + hero.width / 2;
 			slashImg.alpha = 0;
 			slashImg.touchable = false;
+			slashImg.scaleX = slashImg.scaleY = .7;
 			addChild(slashImg);
-			
 			slashTween = new Tween(slashImg, 0.5, Transitions.EASE_OUT);
 		}
 		
@@ -191,7 +193,7 @@ package {
 			//Animation effect
 			Starling.juggler.removeTweens(slashImg);
 			slashImg.alpha = 1;
-			slashImg.y = ground_y - 120;
+			slashImg.y = ground_y - 80;
 			slashTween.reset(slashImg, 0.5, Transitions.EASE_OUT);
 			
 			slashTween.animate("alpha", 0);

@@ -25,7 +25,8 @@ package {
 			super();
 			main = MyStarlingApp.inst;
 			addChild(new Image(Assets.carbTexture));
-			spawn = new Point(main.stage.stageWidth + 50, main.ground_y - height/2);
+			scaleX = scaleY = .55;
+			spawn = new Point(main.stage.stageWidth + 50, main.ground_y - height/2 - 16);
 			
 			// Change images origin to it's center
 			pivotX = width / 2;
