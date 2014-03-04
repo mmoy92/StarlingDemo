@@ -59,7 +59,7 @@ package {
 		 * @param	passedTime
 		 */
 		public function update():void {
-			y += main.velocity.y * 1.67; // 100 * 1 / 60
+			y += main.velocity.y * 3.33; // 100 * 1 / 60
 			
 			if (!isGround) {
 				if (y >= ground_y - 50 && main.velocity.y > 0 && !attacking) {

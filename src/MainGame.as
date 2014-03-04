@@ -226,7 +226,7 @@ package {
 				hero.update();
 				
 				//Create new enemy every couple seconds
-				timer += e.passedTime;
+				timer += 1/30;
 				if (timer > 0.55 + Math.random() * 0.8) {
 					timer = 0;
 					addEnemy();
