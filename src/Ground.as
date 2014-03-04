@@ -1,6 +1,7 @@
 package  
 {
 	import flash.geom.Point;
+	import starling.display.BlendMode;
 	import starling.display.Image;
 	import starling.display.Sprite;
 	import starling.events.EnterFrameEvent;
@@ -22,6 +23,7 @@ package
 			addChild( new Image(Assets.getAtlas().getTexture("ground")));
 			spawn = new Point(main.stage.stageWidth + 50, main.ground_y - 10);
 			touchable = false;
+			//blendMode = BlendMode.NONE;
 			
 		}
 		public function init():void {

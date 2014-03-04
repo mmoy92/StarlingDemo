@@ -151,8 +151,6 @@ package {
 			bgWidth = 854;
 			var bgImg:Image = new Image(Assets.getAtlas().getTexture("bg"));
 			
-			
-			
 			bgImg = new Image(Assets.getAtlas().getTexture("bg"));
 			bgImg.width = bgWidth;
 			bgImg.y = stage.stageHeight - bgImg.height * 1.2;
@@ -227,7 +225,7 @@ package {
 				
 				hero.update();
 				
-				//Create new enemy every couple second
+				//Create new enemy every couple seconds
 				timer += e.passedTime;
 				if (timer > 0.55 + Math.random() * 0.8) {
 					timer = 0;
@@ -263,18 +261,16 @@ package {
 		 * Moves the background depending on the current velocity.x.
 		 */
 		private function scrollBackground():void {
-			bgSprite.x -= velocity.x/2;
-			bgSpriteB.x -= velocity.x/2;
+			bgSprite.x -= velocity.x / 2;
+			bgSpriteB.x -= velocity.x / 2;
 			if (bgSprite.x < -bgWidth) {
 				bgSprite.x = bgSpriteB.x + bgWidth;
+			} else if (bgSprite.x > bgWidth) {
+				bgSprite.x = bgSpriteB.x - bgWidth;
 			}
 			if (bgSpriteB.x < -bgWidth) {
 				bgSpriteB.x = bgSprite.x + bgWidth;
-			}
-			if (bgSprite.x > bgWidth) {
-				bgSprite.x = bgSpriteB.x - bgWidth;
-			}
-			if (bgSpriteB.x > bgWidth) {
+			} else if (bgSpriteB.x > bgWidth) {
 				bgSpriteB.x = bgSprite.x - bgWidth;
 			}
 		}
