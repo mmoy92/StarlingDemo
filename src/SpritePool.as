@@ -23,7 +23,8 @@ package {
 			if (counter > 0) {
 				return pool[--counter];
 			} else {
-				throw new Error("Pool exhausted");
+				return null;
+				//throw new Error("Pool exhausted");
 			}
 		}
 		

@@ -1,11 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Created with TexturePacker http://texturepacker.com-->
-<!-- $TexturePacker:SmartUpdate:d8082c8b4ca729efbf6ad430bef03896$ -->
+<!-- $TexturePacker:SmartUpdate:6c615e34a48efea59e1ffbe42fdc8fe4$ -->
 <TextureAtlas imagePath="spriteSheet.png">
-    <SubTexture name="STHOMAS" x="80" y="400" width="83" height="81"/>
-    <SubTexture name="bg" x="0" y="0" width="550" height="260"/>
-    <SubTexture name="carb" x="0" y="400" width="80" height="100"/>
-    <SubTexture name="fireball" x="163" y="400" width="122" height="77"/>
-    <SubTexture name="ground" x="0" y="260" width="170" height="140"/>
-    <SubTexture name="slash" x="170" y="260" width="160" height="55"/>
+    <SubTexture name="bg" x="0" y="237" width="550" height="270"/>
+    <SubTexture name="butter_die" x="838" y="355" width="102" height="128" frameX="-3" frameY="0" frameWidth="110" frameHeight="156"/>
+    <SubTexture name="butter_fall" x="856" y="199" width="108" height="154" frameX="-2" frameY="-2" frameWidth="110" frameHeight="156"/>
+    <SubTexture name="butter_jump" x="820" y="485" width="96" height="156" frameX="-5" frameY="0" frameWidth="110" frameHeight="156"/>
+    <SubTexture name="butter_stand" x="856" y="57" width="110" height="140" frameX="0" frameY="-16" frameWidth="110" frameHeight="156"/>
+    <SubTexture name="carb" x="942" y="355" width="80" height="94" frameX="0" frameY="-2" frameWidth="80" frameHeight="100"/>
+    <SubTexture name="credits" x="0" y="643" width="356" height="356"/>
+    <SubTexture name="directions" x="552" y="434" width="266" height="68"/>
+    <SubTexture name="farBg" x="0" y="0" width="854" height="235"/>
+    <SubTexture name="ground" x="552" y="237" width="284" height="195"/>
+    <SubTexture name="slash" x="856" y="0" width="160" height="55"/>
 </TextureAtlas>

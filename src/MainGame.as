@@ -1,10 +1,13 @@
 package {
+	import com.greensock.TweenLite;
 	import flash.display.Bitmap;
 	import flash.geom.Point;
 	import flash.geom.Rectangle;
+	import flash.net.SharedObject;
 	import starling.animation.Transitions;
 	import starling.animation.Tween;
 	import starling.core.Starling;
+	import starling.display.BlendMode;
 	import starling.display.Image;
 	import starling.display.Quad;
 	import starling.display.Sprite;
@@ -16,11 +19,11 @@ package {
 	import starling.text.TextField;
 	import starling.textures.Texture;
 	import starling.utils.AssetManager;
+	import starling.utils.HAlign;
 	
 	public class MainGame extends Sprite {
 		public static var inst:MainGame;
 		public var enemyPool:SpritePool;
-		public var groundPool:SpritePool;
 		public var liveEnemies:Vector.<Enemy>;
 		
 		public var velocity:Point;
@@ -36,9 +39,22 @@ package {
 		private var timer:Number;
 		private var score:Number;
 		private var textField:TextField;
+		private var highTxt:TextField;
+		private var aboutTxt:TextField;
+		
 		private var slashImg:Image;
 		private var slashTween:Tween;
+		
+		private var firstPlay:uint;
+		private var directionsImg:Image;
+		private var creditsImg:Image;
+		private var hiscore:Number;
+		public var isPause:Boolean;
+		
 		public var assets:AssetManager;
+		
+		public static var sharedObject:SharedObject;
+		public static const DATA_SHARED_OBJECT:String = "dataSharedObject"; //just a string
 		
 		public function MainGame() {
 			super();
@@ -60,13 +76,13 @@ package {
 			stage.addEventListener(TouchEvent.TOUCH, onTouch);
 			inst = this;
 			
-			init();
+			firstPlay = 0;
 			
-			ground_y = stage.stageHeight * 0.75;
-			enemyPool = new SpritePool(Enemy, 10);
-			groundPool = new SpritePool(Ground, 10);
+			ground_y = stage.stageHeight * 0.7;
+			enemyPool = new SpritePool(Enemy, 15);
 			
 			initLevel();
+			init();
 			this.addEventListener(EnterFrameEvent.ENTER_FRAME, onEnterFrame);
 		}
 		
@@ -74,33 +90,75 @@ package {
 			liveEnemies = new Vector.<Enemy>();
 			velocity = new Point(0, 0);
 			
+			isPause = false;
 			timer = 0;
 			score = 0;
-			
 			gameover = false;
+			
+			hiscore = load("hiscore");
+			if (isNaN(hiscore)) {
+				save("hiscore", 0);
+				hiscore = 0;
+			}
+			
+			highTxt.text = "Best:" + hiscore;
+			
+			if (firstPlay < 3) {
+				directionsImg = new Image(assets.getTexture("directions"));
+				directionsImg.y = ground_y;
+				directionsImg.x = hero.x - directionsImg.width / 2;
+				TweenLite.to(directionsImg, 3, {delay: 5, alpha: 0, onComplete: removeDirections});
+				addChild(directionsImg);
+				firstPlay++;
+			}
+		}
+		
+		public static function save(string:String, value:*):void {
+			sharedObject = SharedObject.getLocal(DATA_SHARED_OBJECT);
+			sharedObject.data[string] = (value);
+			sharedObject.flush();
+		}
+		
+		public static function load(string:String):* {
+			sharedObject = SharedObject.getLocal(DATA_SHARED_OBJECT);
+			return sharedObject.data[string];
 		
 		}
 		
 		private function onTouch(event:TouchEvent):void {
-			var touch:Touch = event.getTouch(stage, TouchPhase.BEGAN);
-			if (touch) {
-				if (!gameover) {
-					var localPos:Point = touch.getLocation(stage);
-					if (localPos.x < stage.stageWidth * 0.3) {
-						moveLeft();
-					} else {
-						attackRight();
-					}
-					textField.text = "Distance: " + score;
+			var btnTouch:Touch = event.getTouch(aboutTxt, TouchPhase.BEGAN);
+			if (btnTouch) {
+				if (!isPause) {
+					isPause = true;
+					aboutTxt.text = "Resume";
+					setChildIndex(creditsImg, numChildren - 1);
+					creditsImg.visible = true;
 				} else {
-					Starling.juggler.purge();
-					
-					while (liveEnemies.length > 0) {
-						var b:Enemy = liveEnemies[0];
-						b.free();
+					isPause = false;
+					aboutTxt.text = "Pause";
+					creditsImg.visible = false
+				}
+			} else if (!isPause) {
+				var touch:Touch = event.getTouch(stage, TouchPhase.BEGAN);
+				if (touch) {
+					if (!gameover) {
+						var localPos:Point = touch.getLocation(stage);
+						if (localPos.x < stage.stageWidth * 0.3) {
+							moveLeft();
+						} else {
+							attackRight();
+						}
+						textField.text = "Distance: " + score;
+					} else {
+						Starling.juggler.purge();
+						
+						while (liveEnemies.length > 0) {
+							var b:Enemy = liveEnemies[0];
+							b.free();
+						}
+						hero.initPosition();
+						init();
 					}
-					hero.initPosition();
-					init();
 				}
 			}
 		}
@@ -113,6 +171,7 @@ package {
 		private function attackRight():void {
 			if (hero.isGround) {
 				hero.isGround = false;
+				hero.changeStance(Hero.JUMP);
 				velocity.y = -23;
 				velocity.x = 18;
 				
@@ -125,13 +184,36 @@ package {
 		 * Called only once.
 		 */
 		private function initLevel():void {
-			//Create textfield
-			textField = new TextField(stage.stageWidth, 300, "Distance: 0");
-			textField.autoScale = true;
-			textField.fontSize = 20;
-			addChild(textField);
 			
 			initBackground();
+			
+			//Create textfield
+			textField = new TextField(stage.stageWidth, 45, "Distance: 0");
+			textField.y = 0;
+			textField.hAlign = HAlign.LEFT;
+			textField.autoScale = true;
+			textField.fontSize = 58;
+			textField.color = 0x084141
+			addChild(textField);
+			
+			highTxt = new TextField(stage.stageWidth, 45, "Distance: 0");
+			highTxt.y = 0;
+			highTxt.x = 0;
+			highTxt.hAlign = HAlign.RIGHT;
+			highTxt.autoScale = true;
+			highTxt.fontSize = 58;
+			highTxt.color = 0x084141
+			addChild(highTxt);
+			
+			aboutTxt = new TextField(100, 45, "Pause");
+			aboutTxt.y = 0;
+			aboutTxt.x = stage.stageWidth / 2 - 50;
+			//aboutTxt.border = true;
+			aboutTxt.hAlign = HAlign.CENTER;
+			aboutTxt.autoScale = true;
+			aboutTxt.fontSize = 58;
+			aboutTxt.color = 0x084141
+			addChild(aboutTxt);
 			
 			//Create hero
 			hero = new Hero();
@@ -139,10 +221,23 @@ package {
 			addChild(hero);
 			
 			initSlashImage();
+			
+			creditsImg = new Image(assets.getTexture("credits"));
+			creditsImg.alpha = 0.6;
+			creditsImg.x = stage.stageWidth / 2;
+			creditsImg.y = 75;
+			creditsImg.visible = false;
+			addChild(creditsImg);
 		
 		}
 		
+		private function removeDirections():void {
+			removeChild(directionsImg);
+			directionsImg = null;
+		}
+		
 		private function initSlashImage():void {
+			
 			slashImg = new Image(MainGame.inst.assets.getTexture("slash"));
 			slashImg.x = hero.x + hero.width / 2;
 			slashImg.alpha = 0;
@@ -156,6 +251,8 @@ package {
 		 * Creates 2 container sprites, each holding 2 copies of the BG texture.
 		 */
 		private function initBackground():void {
+			addChild(new Image(assets.getTexture("farBg")));
+			
 			bgSprite = new Sprite();
 			bgSpriteB = new Sprite();
 			bgWidth = 854;
@@ -163,7 +260,7 @@ package {
 			
 			bgImg = new Image(MainGame.inst.assets.getTexture("bg"));
 			bgImg.width = bgWidth;
-			bgImg.y = stage.stageHeight - bgImg.height * 1.2;
+			bgImg.y = stage.stageHeight - bgImg.height * 1.4;
 			bgSprite.addChild(bgImg);
 			bgSprite.touchable = false;
 			
@@ -172,24 +269,29 @@ package {
 			bgImg = new Image(MainGame.inst.assets.getTexture("bg"));
 			bgImg.width = bgWidth;
 			
-			bgImg.y = stage.stageHeight - bgImg.height * 1.2;
+			bgImg.y = stage.stageHeight - bgImg.height * 1.4;
 			bgSpriteB.addChild(bgImg);
 			bgSpriteB.touchable = false;
 			
 			bgSpriteB.x = bgWidth;
 			addChild(bgSpriteB);
 			
-			var numGround:int = Math.ceil(stage.stageWidth / 170) + 2;
+			var numGround:int = Math.ceil(stage.stageWidth / 284) + 3;
+			trace("numground:" + numGround)
 			for (var i:uint = 0; i < numGround; i++) {
-				var g:Ground = Ground(groundPool.getSprite());
-				g.init();
-				g.x = i * g.width;
+				var g:Ground = new Ground();
+				g.init(i * g.WIDTH);
 			}
 		}
 		
 		public function loseGame():void {
+			
+			if (score > hiscore) {
+				save("hiscore", score);
+			}
+			
 			gameover = true;
-			textField.text = "Game Over! Distance: " + score;
+			//textField.text = "Game Over! Distance: " + score;
 			hero.loseAnimation();
 		}
 		
@@ -213,11 +315,11 @@ package {
 			}
 		}
 		
-		public function addGround():void {
-			var g:Ground = Ground(groundPool.getSprite());
-			g.init();
+		public function addGround(sX:Number):void {
+			var g:Ground = new Ground();
+			g.init(sX);
 			//if (Math.random() > 0.8) {
-				//g.x += hero.width;
+			//g.x += hero.width;
 			//}
 		}
 		
@@ -226,17 +328,18 @@ package {
 		 * @param	e
 		 */
 		private function onEnterFrame(e:EnterFrameEvent):void {
-			if (!gameover) {
+			if (!gameover && !isPause) {
 				if (velocity.x != 0) {
 					horizontalFriction();
 					scrollBackground();
 				}
+				
 				velocity.y += 3;
 				
 				hero.update();
 				
 				//Create new enemy every couple second
-				timer += e.passedTime;
+				timer += 1 / 30;
 				if (timer > 0.55 + Math.random() * 0.8) {
 					timer = 0;
 					addEnemy();
@@ -292,7 +395,9 @@ package {
 		 */
 		private function addEnemy():void {
 			var newEnemy:Enemy = Enemy(enemyPool.getSprite());
-			newEnemy.init();
+			if (newEnemy) {
+				newEnemy.init();
+			}
 		}
 	}
 }

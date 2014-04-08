@@ -57,7 +57,7 @@ package {
 		 * @param	e
 		 */
 		private function onEnterFrame(e:EnterFrameEvent):void {
-			if (!isDead && !main.gameover) {
+			if (!isDead && !main.gameover && !main.isPause) {
 				x += (vel.x - main.velocity.x);
 				y +=  vel.y;
 				if (x < -100 || y > main.stage.stageHeight || y < 0) {

@@ -31,6 +31,8 @@ package {
 			splashBmp = new SplashPNG();
 			stage.addChild(splashBmp);
 			
+			stage.color = 0x084141;
+			
 			SetupStarling();
 		}
 		

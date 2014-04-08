@@ -4,7 +4,7 @@
   <versionNumber>0.1</versionNumber>
   <supportedProfiles>mobileDevice</supportedProfiles>
   <filename>Bread_ver1.2</filename>
-  <name>Bread</name>
+  <name>BREAD</name>
   <android>
     <manifestAdditions><![CDATA[<manifest android:installLocation="auto">
 	<uses-sdk android:minSdkVersion="8" />
