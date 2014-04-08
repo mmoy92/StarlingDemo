@@ -24,7 +24,7 @@ package {
 		public function Enemy() {
 			super();
 			main = MainGame.inst;
-			addChild(new Image(Assets.getAtlas().getTexture("carb")));
+			addChild(new Image(MainGame.inst.assets.getTexture("carb")));
 			scaleX = scaleY = .55;
 			spawn = new Point(main.stage.stageWidth + 50, main.ground_y - height / 2 - 16);
 			

@@ -15,6 +15,7 @@ package {
 	import starling.events.TouchPhase;
 	import starling.text.TextField;
 	import starling.textures.Texture;
+	import starling.utils.AssetManager;
 	
 	public class MainGame extends Sprite {
 		public static var inst:MainGame;
@@ -37,13 +38,36 @@ package {
 		private var textField:TextField;
 		private var slashImg:Image;
 		private var slashTween:Tween;
+		public var assets:AssetManager;
 		
 		public function MainGame() {
 			super();
 			
-			addEventListener(Event.ADDED_TO_STAGE, onAddedToStage);
-			this.addEventListener(EnterFrameEvent.ENTER_FRAME, onEnterFrame);
+			assets = new AssetManager();
+			assets.verbose = true;
+			
+			assets.enqueue(Assets); //yes, enqueue the entire class
+			assets.loadQueue(function(ratio:Number):void {
+					trace("Loading assets, progress:", ratio); //track the progress with this ratio
+					if (ratio == 1.0)
+						initGame();
+				});
 		
+		}
+		
+		private function initGame():void {
+			Main.inst.removeSplash();
+			stage.addEventListener(TouchEvent.TOUCH, onTouch);
+			inst = this;
+			
+			init();
+			
+			ground_y = stage.stageHeight * 0.75;
+			enemyPool = new SpritePool(Enemy, 10);
+			groundPool = new SpritePool(Ground, 10);
+			
+			initLevel();
+			this.addEventListener(EnterFrameEvent.ENTER_FRAME, onEnterFrame);
 		}
 		
 		private function init():void {
@@ -55,20 +79,6 @@ package {
 			
 			gameover = false;
 		
-		}
-		
-		private function onAddedToStage(e:Event):void {
-			removeEventListener(Event.ADDED_TO_STAGE, onAddedToStage);
-			stage.addEventListener(TouchEvent.TOUCH, onTouch);
-			inst = this;
-			
-			init();
-			
-			ground_y = stage.stageHeight * 0.75;
-			enemyPool = new SpritePool(Enemy, 10);
-			groundPool = new SpritePool(Ground, 10);
-			
-			initLevel();
 		}
 		
 		private function onTouch(event:TouchEvent):void {
@@ -133,7 +143,7 @@ package {
 		}
 		
 		private function initSlashImage():void {
-			slashImg = new Image(Assets.getAtlas().getTexture("slash"));
+			slashImg = new Image(MainGame.inst.assets.getTexture("slash"));
 			slashImg.x = hero.x + hero.width / 2;
 			slashImg.alpha = 0;
 			slashImg.touchable = false;
@@ -149,11 +159,9 @@ package {
 			bgSprite = new Sprite();
 			bgSpriteB = new Sprite();
 			bgWidth = 854;
-			var bgImg:Image = new Image(Assets.getAtlas().getTexture("bg"));
+			var bgImg:Image = new Image(MainGame.inst.assets.getTexture("bg"));
 			
-			
-			
-			bgImg = new Image(Assets.getAtlas().getTexture("bg"));
+			bgImg = new Image(MainGame.inst.assets.getTexture("bg"));
 			bgImg.width = bgWidth;
 			bgImg.y = stage.stageHeight - bgImg.height * 1.2;
 			bgSprite.addChild(bgImg);
@@ -161,7 +169,7 @@ package {
 			
 			addChild(bgSprite);
 			
-			bgImg = new Image(Assets.getAtlas().getTexture("bg"));
+			bgImg = new Image(MainGame.inst.assets.getTexture("bg"));
 			bgImg.width = bgWidth;
 			
 			bgImg.y = stage.stageHeight - bgImg.height * 1.2;
@@ -171,7 +179,7 @@ package {
 			bgSpriteB.x = bgWidth;
 			addChild(bgSpriteB);
 			
-			var numGround:int = Math.ceil(stage.stageWidth / 170);
+			var numGround:int = Math.ceil(stage.stageWidth / 170) + 2;
 			for (var i:uint = 0; i < numGround; i++) {
 				var g:Ground = Ground(groundPool.getSprite());
 				g.init();
@@ -208,9 +216,9 @@ package {
 		public function addGround():void {
 			var g:Ground = Ground(groundPool.getSprite());
 			g.init();
-			if (Math.random() > 0.8) {
-				g.x += hero.width;
-			}
+			//if (Math.random() > 0.8) {
+				//g.x += hero.width;
+			//}
 		}
 		
 		/**
@@ -263,8 +271,8 @@ package {
 		 * Moves the background depending on the current velocity.x.
 		 */
 		private function scrollBackground():void {
-			bgSprite.x -= velocity.x/2;
-			bgSpriteB.x -= velocity.x/2;
+			bgSprite.x -= velocity.x / 2;
+			bgSpriteB.x -= velocity.x / 2;
 			if (bgSprite.x < -bgWidth) {
 				bgSprite.x = bgSpriteB.x + bgWidth;
 			}

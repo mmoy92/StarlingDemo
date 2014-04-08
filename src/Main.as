@@ -1,5 +1,6 @@
 package {
 	import flash.desktop.NativeApplication;
+	import flash.display.Bitmap;
 	import flash.display.Sprite;
 	import flash.display.StageAlign;
 	import flash.display.StageScaleMode;
@@ -10,7 +11,11 @@ package {
 	import starling.utils.RectangleUtil;
 	
 	public class Main extends Sprite {
+		[Embed(source="../assets/graphics/Splash.png")]
+		public static const SplashPNG:Class;
+		public static var inst:Main;
 		private var _starling:Starling;
+		private var splashBmp:Bitmap;
 		
 		public function Main():void {
 			// This time we won't scale our application (check next post for that :).
@@ -20,7 +25,17 @@ package {
 			// Trigger an event handler when application looses focus (see note in handler).
 			stage.addEventListener(Event.DEACTIVATE, deactivate);
 			stage.addEventListener(Event.ACTIVATE, activate);
+			
+			inst = this;
+			
+			splashBmp = new SplashPNG();
+			stage.addChild(splashBmp);
+			
 			SetupStarling();
+		}
+		
+		public function removeSplash():void {
+			stage.removeChild(splashBmp);
 		}
 		
 		private function SetupStarling():void {
@@ -34,7 +49,7 @@ package {
 			_starling.stage.stageHeight = 480;
 			
 			// Show debug stats
-			_starling.showStats = true;
+			//_starling.showStats = true;
 			
 			// Define level of antialiasing, 
 			_starling.antiAliasing = 0;

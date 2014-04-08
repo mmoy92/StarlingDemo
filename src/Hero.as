@@ -26,7 +26,7 @@ package {
 		public function Hero() {
 			super();
 			main = MainGame.inst;
-			addChild( new Image(Assets.getAtlas().getTexture("STHOMAS")));
+			addChild( new Image(MainGame.inst.assets.getTexture("STHOMAS")));
 			
 			spawn = new Point(main.stage.stageWidth * 0.3, main.stage.stageHeight / 2);
 			

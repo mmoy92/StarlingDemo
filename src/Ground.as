@@ -11,6 +11,7 @@ package
 	 */
 	public class Ground extends Sprite 
 	{
+		private const WIDTH:uint = 170;
 		private var main:MainGame;
 		private var spawn:Point;
 		
@@ -19,7 +20,7 @@ package
 			super();
 			main = MainGame.inst;
 			
-			addChild( new Image(Assets.getAtlas().getTexture("ground")));
+			addChild( new Image(MainGame.inst.assets.getTexture("ground")));
 			spawn = new Point(main.stage.stageWidth + 50, main.ground_y - 10);
 			touchable = false;
 			
@@ -35,7 +36,7 @@ package
 		private function onEnterFrame(e:EnterFrameEvent):void {
 			if (!main.gameover) {
 				x -= main.velocity.x;
-				if (x < -width) {
+				if (x < -WIDTH) {
 					free();
 				}
 			}
